@@ -2,9 +2,10 @@
 import os,sys
 import datetime
 
-stdFreeSize=19
-#volSize='1M'
-volSize='600G'
+stdFreeSize=24
+volSize='1M'
+#volSize='600G'
+
 
 
 def getDBName():
@@ -85,7 +86,6 @@ def getVolName(dbName, volType):
 
 
 def addVol(dbName, volType, filePath, fileName,cubVersion):
-	log=open('addVol.log','a')
 
 	if cubVersion =='9.2':
 		spCmd='cubrid addvoldb -p ' + volType + ' -F ' + filePath + ' -n ' + fileName + ' ' + dbName + '@localhost --max-writesize-in-sec=50M' + ' --db-volume-size=' + volSize
@@ -95,9 +95,8 @@ def addVol(dbName, volType, filePath, fileName,cubVersion):
 
 	result=os.system(spCmd)
 
-	logWrite(spCmd + '\n' + str(result))
+	logWrite(spCmd + '\n' + 'Result(Success[0]/Fail[1]) : ' + str(result))
 	
-	log.close()
 #	print spCmd
 	return result
 
@@ -105,12 +104,11 @@ def logWrite(msg):
 	log=open('addVol.log','a')
 
 	now=datetime.datetime.now()
-	log.writelines('='*60)
-	log.writelines('\n')
-	log.writelines(str(now))
-	log.writelines('\n')
-	log.writelines(msg)
-	log.writelines('\n')
+	log.writelines('='*80 + '\n')
+	log.writelines(str(now) + '\n')
+	log.writelines(msg + '\n')
+
+	log.close()
 
 
 def checkIOwait():
@@ -153,7 +151,8 @@ if __name__=="__main__":
 			result=checkDiskFree(mountPoint)
 			print result
 #			print dataVol
-			addVol(dbName, 'DATA', dataVol[0], dataVol[1], cubVer)
+			if result==0:
+				addVol(dbName, 'DATA', dataVol[0], dataVol[1], cubVer)
 
 		
 		if float(vol_dict['INDEX'][0:-1]) < stdFreeSize:
